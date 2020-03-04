@@ -14,6 +14,12 @@ public protocol IReorderableStackViewDelegate: AnyObject {
 
 public class ReorderableStackView: UIStackView {
 
+    public var reorderingEnabled: Bool = true {
+        didSet { self.gestures.forEach { $0.isEnabled = self.reorderingEnabled } }
+    }
+
+    private var gestures: [UIGestureRecognizer] = []
+
     private struct Settings {
         static let pressDuration: Double = 0.2
         static let animationDuration: Double = 0.2
@@ -40,9 +46,13 @@ public class ReorderableStackView: UIStackView {
 private extension ReorderableStackView {
 
     func addGesture(to view: UIView) {
+
         let gesture = UILongPressGestureRecognizer(target: self, action: #selector(handleGesture(_:)))
         gesture.minimumPressDuration = Settings.pressDuration
+        gesture.isEnabled = self.reorderingEnabled
+
         view.addGestureRecognizer(gesture)
+        self.gestures.append(gesture)
     }
 
     @objc
