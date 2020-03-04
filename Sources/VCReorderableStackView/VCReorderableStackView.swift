@@ -111,14 +111,14 @@ private extension ReorderableStackView {
         if midY > max(self.reorderingPoint.y, reorderView.frame.midY)
         || midY < min(self.reorderingPoint.y, reorderView.frame.midY) {
 
-            self.delegate?.swapped(index: index, with: reorderViewIndex)
-
             UIView.animate(withDuration: Settings.animationDuration, animations: {
                 self.insertArrangedSubview(reorderView, at: index)
                 self.insertArrangedSubview(view, at: reorderViewIndex)
             })
 
             self.reorderingPoint.y = view.frame.midY
+
+            self.delegate?.swapped(index: index, with: reorderViewIndex)
         }
     }
 
