@@ -8,8 +8,19 @@
 
 import UIKit
 
-public protocol IReorderableStackViewDelegate: AnyObject {
-    func swapped(index: Int, with: Int)
+@objc public protocol IReorderableStackViewDelegate: AnyObject {
+    @objc optional func dragWillStart(with view: UIView)
+    @objc optional func dragDidStart(with view: UIView)
+    @objc optional func swapped(index: Int, with: Int)
+    @objc optional func dragWillEnd(with view: UIView)
+    @objc optional func dragDidEnd(with view: UIView)
+}
+
+@objc public protocol IDraggableView: AnyObject {
+    @objc optional func dragWillStart()
+    @objc optional func dragDidStart()
+    @objc optional func dragWillEnd()
+    @objc optional func dragDidEnd()
 }
 
 public class ReorderableStackView: UIStackView {
@@ -59,14 +70,18 @@ private extension ReorderableStackView {
     func handleGesture(_ gesture: UILongPressGestureRecognizer) {
         switch gesture.state {
         case .began:
+            self.notifyWillStartDragging(with: gesture)
             self.makeSnapshot(with: gesture)
             self.animateStartDragging()
+            self.notifyDidStartDragging(with: gesture)
         case .changed:
             self.moveSnapshot(with: gesture)
             self.reorderViews(with: gesture)
         case .ended, .cancelled, .failed:
+            self.notifyWillEndDragging(with: gesture)
             self.swapSnapshotWithOriginal()
             self.animateEndDragging()
+            self.notifyDidEndDragging(with: gesture)
         default:
             ()
         }
@@ -128,7 +143,7 @@ private extension ReorderableStackView {
 
             self.reorderingPoint.y = view.frame.midY
 
-            self.delegate?.swapped(index: index, with: reorderViewIndex)
+            self.delegate?.swapped?(index: index, with: reorderViewIndex)
         }
     }
 
@@ -167,6 +182,34 @@ private extension ReorderableStackView {
                 subview.transform = CGAffineTransform(scaleX: scale, y: scale)
             }
         }
+    }
+}
+
+// MARK: - delegate notifications
+private extension ReorderableStackView {
+
+    func notifyWillStartDragging(with gesture: UILongPressGestureRecognizer) {
+        guard let gestureView = gesture.view else { return assertionFailure() }
+        self.delegate?.dragWillStart?(with: gestureView)
+        (gestureView as? IDraggableView)?.dragWillStart?()
+    }
+
+    func notifyDidStartDragging(with gesture: UILongPressGestureRecognizer) {
+        guard let gestureView = gesture.view else { return assertionFailure() }
+        self.delegate?.dragDidStart?(with: gestureView)
+        (gestureView as? IDraggableView)?.dragDidStart?()
+    }
+
+    func notifyWillEndDragging(with gesture: UILongPressGestureRecognizer) {
+        guard let gestureView = gesture.view else { return assertionFailure() }
+        self.delegate?.dragWillEnd?(with: gestureView)
+        (gestureView as? IDraggableView)?.dragWillEnd?()
+    }
+
+    func notifyDidEndDragging(with gesture: UILongPressGestureRecognizer) {
+        guard let gestureView = gesture.view else { return assertionFailure() }
+        self.delegate?.dragDidEnd?(with: gestureView)
+        (gestureView as? IDraggableView)?.dragDidEnd?()
     }
 }
 
