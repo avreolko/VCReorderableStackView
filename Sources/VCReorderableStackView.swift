@@ -6,6 +6,8 @@
 //  Copyright © 2020 Valentin Cherepyanko. All rights reserved.
 //
 
+#if canImport(UIKit)
+
 import UIKit
 
 @objc public protocol IReorderableStackViewDelegate: AnyObject {
@@ -231,3 +233,5 @@ private extension UIStackView {
         return nil
     }
 }
+
+#endif
