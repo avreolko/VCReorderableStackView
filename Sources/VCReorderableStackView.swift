@@ -122,29 +122,51 @@ private extension ReorderableStackView {
     }
 
     func reorderViews(with gesture: UILongPressGestureRecognizer) {
-
+        
+        var snapshotViewFrame: CGFloat? = .zero
+        var reorderingPoint: CGFloat = .zero
+        var reorderViewFrame: CGFloat = .zero
+        
+        if self.axis == .horizontal {
+            snapshotViewFrame = self.snapshotView?.frame.midX
+            reorderingPoint = self.reorderingPoint.x
+        } else {
+            snapshotViewFrame = self.snapshotView?.frame.midY
+            reorderingPoint = self.reorderingPoint.y
+        }
+        
         guard
             let view = self.originalView,
-            let midY = self.snapshotView?.frame.midY,
+            let midY = snapshotViewFrame,
             let index = self.index(of: view)
         else { return }
-
-        let reorderViewIndex = (midY > self.reorderingPoint.y)
+        
+        let reorderViewIndex = (midY > reorderingPoint)
             ? index + 1
             : index - 1
-
+        
         guard let reorderView = self.view(for: reorderViewIndex) else { return }
-
-        if midY > max(self.reorderingPoint.y, reorderView.frame.midY)
-        || midY < min(self.reorderingPoint.y, reorderView.frame.midY) {
-
+        
+        var viewFrame: CGFloat = .zero
+        
+        if self.axis == .horizontal {
+            reorderViewFrame = reorderView.frame.midX
+            viewFrame = view.frame.midX
+        } else {
+            reorderViewFrame = reorderView.frame.midY
+            viewFrame = view.frame.midY
+        }
+        
+        if midY > max(reorderingPoint, reorderViewFrame)
+            || midY < min(reorderingPoint, reorderViewFrame) {
+            
             UIView.animate(withDuration: Settings.animationDuration, animations: {
                 self.insertArrangedSubview(reorderView, at: index)
                 self.insertArrangedSubview(view, at: reorderViewIndex)
             })
-
-            self.reorderingPoint.y = view.frame.midY
-
+            
+            reorderingPoint = viewFrame
+            
             self.delegate?.swapped?(index: index, with: reorderViewIndex)
         }
     }
