@@ -16,4 +16,7 @@ public protocol IReorderableStackViewDelegate: AnyObject {
 }
 ```
 
+## License
+This project is released under the [MIT license](https://en.wikipedia.org/wiki/MIT_License).
+
 
