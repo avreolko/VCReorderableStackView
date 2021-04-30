@@ -121,21 +121,21 @@ private extension ReorderableStackView {
 
     func reorderViews(with gesture: UILongPressGestureRecognizer) {
         
-        var snapshotViewFrame: CGFloat? = .zero
+        var snapshotViewMidPoint: CGFloat? = .zero
         var reorderingPoint: CGFloat = .zero
         var reorderViewFrame: CGFloat = .zero
         
         if self.axis == .horizontal {
-            snapshotViewFrame = self.snapshotView?.frame.midX
+            snapshotViewMidPoint = self.snapshotView?.frame.midX
             reorderingPoint = self.reorderingPoint.x
         } else {
-            snapshotViewFrame = self.snapshotView?.frame.midY
+            snapshotViewMidPoint = self.snapshotView?.frame.midY
             reorderingPoint = self.reorderingPoint.y
         }
         
         guard
             let view = self.originalView,
-            let midY = snapshotViewFrame,
+            let midY = snapshotViewMidPoint,
             let index = self.index(of: view)
         else { return }
         
@@ -145,14 +145,14 @@ private extension ReorderableStackView {
         
         guard let reorderView = self.view(for: reorderViewIndex) else { return }
         
-        var viewFrame: CGFloat = .zero
+        var viewMidPoint: CGFloat = .zero
         
         if self.axis == .horizontal {
             reorderViewFrame = reorderView.frame.midX
-            viewFrame = view.frame.midX
+            viewMidPoint = view.frame.midX
         } else {
             reorderViewFrame = reorderView.frame.midY
-            viewFrame = view.frame.midY
+            viewMidPoint = view.frame.midY
         }
         
         if midY > max(reorderingPoint, reorderViewFrame)
@@ -163,7 +163,7 @@ private extension ReorderableStackView {
                 self.insertArrangedSubview(view, at: reorderViewIndex)
             })
             
-            reorderingPoint = viewFrame
+            reorderingPoint = viewMidPoint
             
             self.delegate?.swapped?(index: index, with: reorderViewIndex)
         }
