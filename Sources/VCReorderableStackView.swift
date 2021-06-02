@@ -71,7 +71,7 @@ public class ReorderableStackView: UIStackView {
         self.addGesture(to: view)
     }
     
-    open func insertArrangedSubview(_ view: UIView, at stackIndex: Int) {
+    override public func insertArrangedSubview(_ view: UIView, at stackIndex: Int) {
         super.insertArrangedSubview(view, at: stackIndex)
         view.isUserInteractionEnabled = true
         self.addGesture(to: view)
